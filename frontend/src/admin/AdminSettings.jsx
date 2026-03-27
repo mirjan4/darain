@@ -327,21 +327,23 @@ const AdminSettings = () => {
                                         onClick={() => applyTheme('dynamic')}
                                         className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'dynamic' ? 'border-[#2F468C] bg-[#2F468C]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
                                     >
-                                        <div className="w-16 h-12 bg-[#1a1a1a] rounded shadow-sm border border-gray-100 mb-3 flex flex-col gap-1 p-1 overflow-hidden relative">
-                                            <div className="w-full h-8 bg-black/20 rounded-sm"></div>
-                                            <div className="flex gap-1 h-3 mt-auto">
-                                                <div className="w-1/4 h-full bg-white/20 rounded-sm"></div>
-                                                <div className="w-1/4 h-full bg-white/20 rounded-sm"></div>
-                                                <div className="w-1/4 h-full bg-white/20 rounded-sm"></div>
-                                                <div className="w-1/4 h-full bg-white/20 rounded-sm"></div>
-                                            </div>
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-[6px] text-white opacity-40 font-black">DYNAMIC</span>
-                                            </div>
+                                        <div className="w-16 h-12 bg-[#1a1a1a] rounded shadow-sm border border-gray-100 mb-3 flex flex-col gap-1 p-1 overflow-hidden relative text-center items-center justify-center">
+                                            <span className="text-[6px] text-white opacity-40 font-black">DYNAMIC</span>
                                         </div>
                                         <span className="text-xs font-bold text-gray-900">Dynamic Multi</span>
                                         <span className="text-[10px] text-gray-400 mt-1">interactive & storytelling</span>
-                                        {settings.theme === 'dynamic' && <div className="mt-3 flex items-center justify-center gap-1.5 text-[10px] font-black text-[#2F468C] uppercase tracking-widest"><Check size={12} /> Active</div>}
+                                    </button>
+
+                                    <button 
+                                        type="button"
+                                        onClick={() => applyTheme('motion-green')}
+                                        className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'motion-green' ? 'border-[#7FBFA6] bg-[#7FBFA6]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                    >
+                                        <div className="w-16 h-12 bg-[#F8FAF9] rounded shadow-sm border border-[#EEF5F2] mb-3 flex flex-col gap-1 p-1 overflow-hidden relative text-center items-center justify-center">
+                                            <div className="w-4 h-4 bg-[#7FBFA6] rounded-full animate-bounce"></div>
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-900">Motion Green</span>
+                                        <span className="text-[10px] text-gray-400 mt-1">Soft Luxury & Motion</span>
                                     </button>
                                 </div>
                             </div>

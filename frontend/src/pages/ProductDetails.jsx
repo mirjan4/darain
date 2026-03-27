@@ -14,7 +14,8 @@ const ProductDetails = () => {
     const [isEnquiryOpen, setIsEnquiryOpen] = useState(false);
     
     const { theme } = useSettings();
-    const isDynamic = theme === 'dynamic';
+    const isDynamic = theme === 'dynamic' || theme === 'motion-green';
+    const isMotionGreen = theme === 'motion-green';
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -143,7 +144,7 @@ const ProductDetails = () => {
                         <div className="flex flex-col py-2 lg:py-6">
                             <div className="mb-4">
                                 <p className="text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2">{(product.category_name || product.category || '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
-                                <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2F468C] mb-4 lg:mb-6 leading-[1.15] tracking-tight ${isDynamic ? 'font-outfit' : 'font-serif italic'}`}>{product.name}</h1>
+                                <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold ${isMotionGreen ? 'text-[#7FBFA6]' : 'text-[#2F468C]'} mb-4 lg:mb-6 leading-[1.15] tracking-tight ${isDynamic ? 'font-outfit' : 'font-serif italic'}`}>{product.name}</h1>
                                 
                                 <div className="flex items-baseline gap-4 mb-4">
                                     <p className={`text-3xl lg:text-4xl font-medium text-gray-900 tracking-tighter ${isDynamic ? 'font-outfit' : 'font-sans'}`}>₹{displayPrice}</p>
@@ -224,7 +225,7 @@ const ProductDetails = () => {
                                     className={`w-full group relative flex items-center justify-center gap-4 py-5 rounded-3xl font-bold uppercase tracking-[0.2em] text-[11px] transition-all duration-500 shadow-2xl ${
                                         isOutOfStock 
                                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' 
-                                        : 'bg-[#2F468C] hover:bg-[#1a2b5c] text-white shadow-[#2F468C]/20 hover:shadow-[#2F468C]/40 hover:-translate-y-1'
+                                        : `${isMotionGreen ? 'bg-[#7FBFA6] hover:bg-[#6FAE95]' : 'bg-[#2F468C] hover:bg-[#1a2b5c]'} text-white shadow-[#2F468C]/20 hover:shadow-[#2F468C]/40 hover:-translate-y-1`
                                     }`}
                                 >
                                     <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-transparent via-white/5 to-transparent transition-opacity" />

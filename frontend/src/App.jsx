@@ -23,6 +23,12 @@ import DynamicHome from './themes/dynamic/DynamicHome';
 import DynamicCollections from './themes/dynamic/DynamicCollections';
 import DynamicContact from './themes/dynamic/DynamicContact';
 
+// Motion Green Theme Pages
+import MotionGreenLayout from './themes/motion-green/MotionGreenLayout';
+import MotionGreenHome from './themes/motion-green/MotionGreenHome';
+import MotionGreenCollections from './themes/motion-green/MotionGreenCollections';
+import MotionGreenContact from './themes/motion-green/MotionGreenContact';
+
 // Admin Pages
 import Login from './admin/Login';
 import AdminLayout from './admin/AdminLayout';
@@ -44,6 +50,7 @@ const ThemeRouter = () => {
     const activeTheme = theme || 'default';
     const isModern = activeTheme === 'modern';
     const isDynamic = activeTheme === 'dynamic';
+    const isMotionGreen = activeTheme === 'motion-green';
 
     console.log(`[Darain Theme] Active: ${activeTheme}`);
 
@@ -52,13 +59,10 @@ const ThemeRouter = () => {
     }, [brand_name]);
 
     // Theme components Mapping
-    const ActiveLayout = isDynamic ? DynamicLayout : (isModern ? ModernLayout : Layout);
-    const ActiveHome = isDynamic ? DynamicHome : (isModern ? ModernHome : Home);
-    
-    // Note: If you want to create Modern product pages, add them here.
-    // For now, they fallback to the default content pages wrapped in the modern layout!
-    const ActiveCollections = isDynamic ? DynamicCollections : (isModern ? ModernCollections : Collections); 
-    const ActiveContact = isDynamic ? DynamicContact : Home; // Fallback to Home if default contact doesn't exist
+    const ActiveLayout = isMotionGreen ? MotionGreenLayout : (isDynamic ? DynamicLayout : (isModern ? ModernLayout : Layout));
+    const ActiveHome = isMotionGreen ? MotionGreenHome : (isDynamic ? DynamicHome : (isModern ? ModernHome : Home));
+    const ActiveCollections = isMotionGreen ? MotionGreenCollections : (isDynamic ? DynamicCollections : (isModern ? ModernCollections : Collections)); 
+    const ActiveContact = isMotionGreen ? MotionGreenContact : (isDynamic ? DynamicContact : Home); 
     const ActiveProductDetails = ProductDetails;
     const ActiveAboutUs = AboutUs;
 
