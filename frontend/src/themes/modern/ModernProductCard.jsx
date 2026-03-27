@@ -54,7 +54,7 @@ const ModernProductCard = ({ product }) => {
                 </h3>
                 
                 <p className="text-[10px] text-gray-500 mt-1 mb-1 tracking-tight">
-                    {product.category || 'Premium Collection'}
+                    {(product.category_name || product.category || 'Premium Collection').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
                 </p>
 
                 <div className="flex items-center gap-2">

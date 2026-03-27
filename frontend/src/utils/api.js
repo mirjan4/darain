@@ -21,6 +21,7 @@ api.interceptors.request.use((config) => {
 
 export const login = (credentials) => api.post('/login.php', credentials);
 export const getProducts = () => api.get('/products.php');
+export const getCategories = () => api.get('/categories.php');
 export const getProductById = (id) => api.get(`/product.php?id=${id}`);
 export const addProduct = (data) => api.post('/add_product.php', data);
 export const updateProduct = (data) => api.post('/update_product.php', data);

@@ -142,7 +142,7 @@ const ProductDetails = () => {
                         {/* Product Information Column */}
                         <div className="flex flex-col py-2 lg:py-6">
                             <div className="mb-4">
-                                <p className="text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2">{product.category}</p>
+                                <p className="text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-2">{(product.category_name || product.category || '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}</p>
                                 <h1 className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-[#2F468C] mb-4 lg:mb-6 leading-[1.15] tracking-tight ${isDynamic ? 'font-outfit' : 'font-serif italic'}`}>{product.name}</h1>
                                 
                                 <div className="flex items-baseline gap-4 mb-4">
@@ -175,30 +175,28 @@ const ProductDetails = () => {
                                     <button className="text-[10px] uppercase font-bold text-gray-400 underline underline-offset-4 hover:text-[#2F468C] tracking-widest transition-colors">Find My Size</button>
                                 </div>
                                 <div className="flex flex-wrap gap-3">
-                                    {['S', 'M', 'L', 'XL'].map(size => {
-                                        const isAvailable = sizesArr.includes(size);
-                                        return (
+                                    {sizesArr.length > 0 ? (
+                                        sizesArr.map(size => (
                                             <button
                                                 key={size}
-                                                disabled={!isAvailable}
-                                                onClick={() => setSelectedSize(size)}
+                                                onClick={() => setSelectedSize(size.trim())}
                                                 className={`w-12 h-12 lg:w-14 lg:h-14 rounded-2xl border flex items-center justify-center font-bold text-sm transition-all duration-300 relative ${
-                                                    !isAvailable 
-                                                    ? 'opacity-20 cursor-not-allowed bg-gray-50 border-gray-100 text-gray-300' 
-                                                    : selectedSize === size 
+                                                    selectedSize === size.trim() 
                                                         ? 'border-[#2F468C] bg-[#2F468C] text-white shadow-xl shadow-[#2F468C]/20 scale-105' 
                                                         : 'border-gray-200 bg-white text-gray-600 hover:border-[#2F468C]/30 hover:bg-gray-50/50'
                                                 }`}
                                             >
-                                                {size}
-                                                {selectedSize === size && (
+                                                {size.trim()}
+                                                {selectedSize === size.trim() && (
                                                     <div className="absolute -top-1.5 -right-1.5 bg-white text-[#2F468C] rounded-full shadow-lg border border-gray-100">
                                                         <Check size={14} className="p-0.5" />
                                                     </div>
                                                 )}
                                             </button>
-                                        );
-                                    })}
+                                        ))
+                                    ) : (
+                                        <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">Free Size / Universal Fit</div>
+                                    )}
                                 </div>
                             </div>
 

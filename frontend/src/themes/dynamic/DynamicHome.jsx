@@ -43,25 +43,37 @@ const DynamicHome = () => {
         fetchData();
     }, []);
 
-    // Dynamic Category Image Helper
     const getLatestImageFor = (categoryName) => {
         if (!products || products.length === 0 || !Array.isArray(products)) return null;
         
-        // Search in name or category
-        const matchingProduct = products.find(p => 
-            (p.name && p.name.toLowerCase().includes(categoryName.toLowerCase())) || 
-            (p.category && p.category.toLowerCase().includes(categoryName.toLowerCase()))
-        );
+        // Match case-insensitively against name or category
+        const search = categoryName.toUpperCase();
+        const matchingProduct = products.find(p => {
+             const pCat = (p.category_name || p.category || '').toUpperCase();
+             return pCat === search || (p.name && p.name.toUpperCase().includes(search));
+        });
 
         const imgPath = matchingProduct?.main_image || matchingProduct?.image;
-        return imgPath ? `${UPLOADS_BASE_URL}/${imgPath}` : null;
+        if (imgPath) return `${UPLOADS_BASE_URL}/${imgPath}`;
+        
+        // Fallbacks for empty categories
+        const fallbacks = {
+            'PREMIUM ABAYA': 'https://images.unsplash.com/photo-1583391733924-46c59d997f76?auto=format&fit=crop&q=80&w=800',
+            'STANDARD ABAYA': 'https://images.unsplash.com/photo-1594235412402-b1cd9697d82f?auto=format&fit=crop&q=80&w=800',
+            'MADRASA ABAYA': 'https://images.unsplash.com/photo-1606161741793-1389c926bc5a?auto=format&fit=crop&q=80&w=800',
+            'NIQAB': 'https://images.unsplash.com/photo-1620786938953-ad98a96e987c?auto=format&fit=crop&q=80&w=800',
+            'GLOVES & SOCKS': 'https://images.unsplash.com/photo-1581404196944-59e38f6b0bda?auto=format&fit=crop&q=80&w=800'
+        };
+        return fallbacks[search] || 'https://images.unsplash.com/photo-1583391733924-46c59d997f76?auto=format&fit=crop&q=80&w=800';
     };
 
-    const categories = [
-        { name: "Premium Abaya", image: getLatestImageFor("Premium Abaya") || "https://images.unsplash.com/photo-1583391733924-46c59d997f76?auto=format&fit=crop&q=80&w=800" },
-        { name: "Standard Abaya", image: getLatestImageFor("Standard Abaya") || "https://images.unsplash.com/photo-1594235412402-b1cd9697d82f?auto=format&fit=crop&q=80&w=800" },
-        { name: "Niqab", image: getLatestImageFor("Niqab") || "https://images.unsplash.com/photo-1606161741793-1389c926bc5a?auto=format&fit=crop&q=80&w=800" },
-        { name: "Glove", image: getLatestImageFor("Glove") || "https://images.unsplash.com/photo-1581404196944-59e38f6b0bda?auto=format&fit=crop&q=80&w=800" },
+    const categoriesData = [
+        { name: "Premium Abaya",  slug: "premium-abaya" },
+        { name: "Standard Abaya", slug: "standard-abaya" },
+        { name: "Madrasa Abaya",  slug: "madrasa-abaya" },
+        { name: "Scarf",          slug: "scarf" },
+        { name: "Niqab",          slug: "niqab" },
+        { name: "Gloves & Socks", slug: "gloves-socks" },
     ];
 
     const currentSlide = slides[activeSlideIndex] || {
@@ -163,15 +175,15 @@ const DynamicHome = () => {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-                    {categories.map((cat, idx) => (
+                    {categoriesData.map((cat, idx) => (
                         <Link 
-                            key={cat.name}
-                            to={`/collections/${cat.name}`}
+                            key={cat.slug}
+                            to={`/collections/${cat.slug}`}
                             className="group block relative aspect-[4/5] rounded-3xl overflow-hidden shadow-sm shadow-black/5"
                             data-aos="zoom-in"
                             data-aos-delay={idx * 100}
                         >
-                            <img src={cat.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={cat.name} />
+                            <img src={getLatestImageFor(cat.name)} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={cat.name} />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent"></div>
                             <div className="absolute bottom-10 left-10 right-10 flex flex-col items-center">
                                 <h3 className="text-2xl font-black font-outfit text-white tracking-tight">{cat.name}</h3>

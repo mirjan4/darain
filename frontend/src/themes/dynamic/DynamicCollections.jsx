@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getProducts } from '../../utils/api';
+import { getProducts, getCategories } from '../../utils/api';
 import DynamicProductCard from './DynamicProductCard';
 import { ChevronRight, Filter, LayoutGrid, List, Sparkles } from 'lucide-react';
 
@@ -10,26 +10,38 @@ const DynamicCollections = () => {
     const [loading, setLoading] = useState(true);
     const [activeFilter, setActiveFilter] = useState(category || 'All');
 
+    const [filters, setFilters] = useState(["All"]);
+
     useEffect(() => {
-        const fetchProducts = async () => {
+        const loadCollections = async () => {
             setLoading(true);
             try {
-                const res = await getProducts();
-                let data = res.data || [];
-                if (activeFilter !== 'All') {
-                    data = data.filter(p => p.category === activeFilter);
-                }
-                setProducts(data);
+                const [pRes, cRes] = await Promise.all([getProducts(), getCategories()]);
+                const prods = pRes.data || [];
+                const cats = cRes.data || [];
+                
+                setFilters(["All", ...cats.map(c => c.name)]);
+                
+                // Filtering logic
+                const filtered = prods.filter(product => {
+                    if (activeFilter === 'All') return true;
+                    
+                    const pCat = (product.category_name || product.category || '').toUpperCase();
+                    const fUpper = activeFilter.toUpperCase();
+                    const fSlug = activeFilter.replace(/-/g, ' ').toUpperCase();
+                    
+                    return pCat === fUpper || pCat === fSlug;
+                });
+                
+                setProducts(filtered);
             } catch (error) {
-                console.error("Error fetching collection:", error);
+                console.error("Error fetching dynamic collection:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchProducts();
+        loadCollections();
     }, [activeFilter, category]);
-
-    const filters = ["All", "Children's Abaya", "Gloves & Socks", "Niqab", "Premium Abaya", "Scarf", "Standard Abaya"];
 
     return (
         <div className="min-h-screen bg-white pb-32 font-sans overflow-hidden">
@@ -70,7 +82,7 @@ const DynamicCollections = () => {
                                 onClick={() => setActiveFilter(f)}
                                 className={`px-6 py-3 rounded-full text-[10px] font-black font-outfit uppercase tracking-widest transition-all duration-500 border-2 ${activeFilter === f ? 'bg-[#2F468C] border-[#2F468C] text-white shadow-lg shadow-[#2F468C]/20 scale-105' : 'bg-gray-50 border-gray-50 text-gray-400 hover:border-gray-200 hover:bg-white'}`}
                             >
-                                {f}
+                                {f.charAt(0) + f.slice(1).toLowerCase()}
                             </button>
                         ))}
                     </div>

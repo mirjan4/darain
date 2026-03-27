@@ -15,32 +15,12 @@ const Collections = () => {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [sortBy, setSortBy] = useState("newest");
 
-    const categories = [
-        "All",
-        "Children's Abaya",
-        "Gloves & Socks",
-        "Niqab",
-        "Premium Abaya",
-        "Scarf",
-        "Standard Abaya"
-    ];
+    // Built dynamically from product data — no hardcoding needed
+    const [categories, setCategories] = useState(["All"]);
 
     useEffect(() => {
         if (urlCategory) {
-            const categoryMap = {
-                'childrens-abaya': "Children's Abaya",
-                'gloves-socks': "Gloves & Socks",
-                'niqab': "Niqab",
-                'premium-abaya': "Premium Abaya",
-                'scarf': "Scarf",
-                'standard-abaya': "Standard Abaya"
-            };
-            const mapped = categoryMap[urlCategory];
-            if (mapped) {
-                setSelectedCategory(mapped);
-            } else {
-                setSelectedCategory("All");
-            }
+            setSelectedCategory(urlCategory); // store slug; match resolved case-insensitively
         } else {
             setSelectedCategory("All");
         }
@@ -50,8 +30,16 @@ const Collections = () => {
         const fetchProducts = async () => {
             try {
                 const response = await getProducts();
-                setProducts(response.data);
-                setFilteredProducts(response.data);
+                const data = response.data;
+                setProducts(data);
+                setFilteredProducts(data);
+
+                // Build unique category list from real data (case-preserved)
+                const unique = ["All", ...new Set(
+                    data.map(p => p.category_name || p.category).filter(Boolean)
+                )].sort((a, b) => a === "All" ? -1 : a.localeCompare(b));
+                setCategories(unique);
+
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching products:", error);
@@ -63,9 +51,20 @@ const Collections = () => {
 
     useEffect(() => {
         let results = products.filter(product => {
-            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                product.product_code.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+            const term = searchTerm.toLowerCase();
+            const matchesSearch = 
+                product.name?.toLowerCase().includes(term) ||
+                product.product_code?.toLowerCase().includes(term);
+
+            // Case-insensitive category match; also support slug-based URL param
+            const productCat = (product.category_name || product.category || '').toUpperCase();
+            const selectedUpper = selectedCategory.toUpperCase();
+            // Also try matching by slug (e.g. 'premium-abaya' vs 'PREMIUM ABAYA')
+            const selectedAsSlug = selectedCategory.replace(/-/g, ' ').toUpperCase();
+            const matchesCategory = selectedCategory === 'All' ||
+                productCat === selectedUpper ||
+                productCat === selectedAsSlug;
+
             return matchesSearch && matchesCategory;
         });
 

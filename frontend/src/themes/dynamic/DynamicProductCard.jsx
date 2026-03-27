@@ -66,7 +66,9 @@ const DynamicProductCard = ({ product }) => {
 
             {/* Info Section */}
             <div className="p-4 md:p-5 flex flex-col gap-1">
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">{product.category}</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">
+                    {(product.category_name || product.category || '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
+                </p>
                 <Link to={`/product/${product.id}`} className="text-sm md:text-base font-bold text-gray-900 hover:text-[#2F468C] transition-colors line-clamp-1 leading-tight">
                     {product.name}
                 </Link>

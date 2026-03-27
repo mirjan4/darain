@@ -38,9 +38,12 @@ const Home = () => {
         }
     }, [location.hash, products]); // Re-run when hash or products change
 
-    // Filtered products for specific sections
-    const premiumAbayas = products.filter(p => p.category === 'Premium Abaya').slice(0, 4);
-    const standardAbayas = products.filter(p => p.category === 'Standard Abaya').slice(0, 4);
+    // Case-insensitive helper — DB stores 'PREMIUM ABAYA', display uses 'Premium Abaya'
+    const byCategory = (cat) => products.filter(p =>
+        (p.category_name || p.category || '').toUpperCase() === cat.toUpperCase()
+    );
+    const premiumAbayas  = byCategory('Premium Abaya').slice(0, 4);
+    const standardAbayas = byCategory('Standard Abaya').slice(0, 4);
 
     const SectionHeader = ({ subtitle, title, path }) => (
         <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-10 border-b border-gray-100 pb-6 gap-6" data-aos="fade-up">

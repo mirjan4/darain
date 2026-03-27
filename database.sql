@@ -25,18 +25,35 @@ CREATE TABLE IF NOT EXISTS `users` (
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Product Categories Table
+CREATE TABLE IF NOT EXISTS `product_categories` (
+    `id`          INT AUTO_INCREMENT PRIMARY KEY,
+    `name`        VARCHAR(150) NOT NULL,
+    `slug`        VARCHAR(170) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `created_at`  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `name` (`name`),
+    UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Products Table
 CREATE TABLE IF NOT EXISTS `products` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `product_code` VARCHAR(50) NOT NULL UNIQUE,
-    `name` VARCHAR(255) NOT NULL,
-    `description` TEXT,
-    `category` VARCHAR(100) NOT NULL,
-    `price` DECIMAL(10, 2) NOT NULL,
-    `offer_price` DECIMAL(10, 2) DEFAULT NULL,
+    `id`           INT AUTO_INCREMENT PRIMARY KEY,
+    `category_id`  INT NULL,
+    `category`     VARCHAR(100) DEFAULT NULL,           -- legacy text fallback
+    `product_code` VARCHAR(50) DEFAULT NULL,
+    `name`         VARCHAR(255) NOT NULL,
+    `slug`         VARCHAR(255) DEFAULT NULL,
+    `description`  TEXT,
+    `details`      LONGTEXT DEFAULT NULL,               -- rich HTML from production
+    `price`        DECIMAL(10, 2) NOT NULL,
+    `offer_price`  DECIMAL(10, 2) DEFAULT NULL,
     `stock_status` ENUM('In Stock', 'Out of Stock') DEFAULT 'In Stock',
-    `sizes` VARCHAR(255), -- Comma separated sizes e.g. "S,M,L,XL"
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `is_featured`  TINYINT(1) NOT NULL DEFAULT 0,
+    `is_available` TINYINT(1) NOT NULL DEFAULT 1,
+    `sizes`        VARCHAR(255),
+    `created_at`   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`category_id`) REFERENCES `product_categories`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Product Images Table
@@ -120,5 +137,15 @@ INSERT IGNORE INTO `settings` (
   '9:00 AM – 9:00 PM', 
   'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31317.06059905973!2d75.98774052069675!3d10.998495632007823!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba7b161f5cce121%3A0x6bba4da34947dc16!2sKottakkal%2C%20Kerala!5e0!3m2!1sen!2sin!4v1710505809786!5m2!1sen!2sin'
 );
+
+-- Default Product Categories
+INSERT IGNORE INTO `product_categories` (`id`, `name`, `slug`) VALUES
+(1, 'PREMIUM ABAYA',    'premium-abaya'),
+(2, 'STANDARD ABAYA',   'standard-abaya'),
+(3, 'CHILDRENS ABAYA',  'childrens-abaya'),
+(4, 'SCARF',            'scarf'),
+(5, 'NIQAB',            'niqab'),
+(6, 'GLOVES & SOCKS',   'gloves-socks'),
+(7, 'MADRASA ABAYA',    'madrasa-abaya');
 
 COMMIT;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getProducts, getHeroSlides } from '../../utils/api';
+import { getProducts, getHeroSlides, getCategories } from '../../utils/api';
 import ModernProductCard from './ModernProductCard';
 import { ChevronDown } from 'lucide-react';
 
@@ -16,15 +16,19 @@ const ModernHome = () => {
 
     const sortOptions = ["Newest", "Price: Low to High", "Price: High to Low"];
 
+    const [categories, setCategories] = useState([]);
+
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [prodRes, slideRes] = await Promise.all([
+                const [prodRes, slideRes, catRes] = await Promise.all([
                     getProducts(),
-                    getHeroSlides()
+                    getHeroSlides(),
+                    getCategories()
                 ]);
                 setProducts(prodRes.data || []);
                 setSlides(slideRes.data?.data || []);
+                setCategories(catRes.data || []);
             } catch (error) {
                 console.error("Error fetching data:", error);
             } finally {
@@ -34,19 +38,15 @@ const ModernHome = () => {
         fetchData();
     }, []);
 
-    const categories = [
-        "Children's Abaya",
-        "Gloves & Socks",
-        "Niqab",
-        "Premium Abaya",
-        "Scarf",
-        "Standard Abaya"
-    ];
+    // (Categories now fetched dynamically above)
 
     // Filter logic
     let displayedProducts = [...products];
     if (activeCategory !== 'All Categories') {
-        displayedProducts = displayedProducts.filter(p => p.category === activeCategory);
+        displayedProducts = displayedProducts.filter(p => {
+            const pCat = (p.category_name || p.category || '').toUpperCase();
+            return pCat === activeCategory.toUpperCase();
+        });
     }
 
     if (sortBy === "Price: Low to High") {
@@ -132,11 +132,11 @@ const ModernHome = () => {
                                     </button>
                                     {categories.map(cat => (
                                         <button 
-                                            key={cat}
-                                            onClick={() => { setActiveCategory(cat); setShowCategoryDropdown(false); }}
-                                            className={`w-full text-left px-6 py-2.5 text-sm transition-colors ${activeCategory === cat ? 'font-bold text-black bg-gray-50' : 'text-gray-600 hover:text-black hover:bg-gray-50/50'}`}
+                                            key={cat.id}
+                                            onClick={() => { setActiveCategory(cat.name); setShowCategoryDropdown(false); }}
+                                            className={`w-full text-left px-6 py-2.5 text-sm transition-colors ${activeCategory.toUpperCase() === cat.name.toUpperCase() ? 'font-bold text-black bg-gray-50' : 'text-gray-600 hover:text-black hover:bg-gray-50/50'}`}
                                         >
-                                            {cat}
+                                            {cat.name.charAt(0) + cat.name.slice(1).toLowerCase()}
                                         </button>
                                     ))}
                                 </div>

@@ -64,7 +64,9 @@ const ProductCard = ({ product }) => {
       {/* Product Details Section */}
       <div className="p-3 md:p-4 space-y-2 md:space-y-3">
         <div className="space-y-0.5 md:space-y-1 text-center">
-            <p className="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-widest">{product.category}</p>
+            <p className="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                {(product.category_name || product.category || '').toLowerCase().replace(/\b\w/g, c => c.toUpperCase())}
+            </p>
             <h3 className="text-sm md:text-base font-poppins font-semibold text-[#2F468C] truncate leading-tight group-hover:text-[#1a237e] transition-colors">
                 {product.name}
             </h3>

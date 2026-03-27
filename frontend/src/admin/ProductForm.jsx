@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Save, X, Upload, Trash2, Plus, ArrowLeft, Image as ImageIcon } from 'lucide-react';
-import { addProduct, updateProduct, getProductById, uploadImage, UPLOADS_BASE_URL } from '../utils/api';
+import { addProduct, updateProduct, getProductById, uploadImage, UPLOADS_BASE_URL, getCategories } from '../utils/api';
 
 const ProductForm = () => {
     const { id } = useParams();
@@ -22,7 +22,24 @@ const ProductForm = () => {
     
     const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
-    const availableSizes = ['S', 'M', 'L', 'XL'];
+    const [categories, setCategories] = useState([]);
+    const availableSizes = ['S', 'M', 'L', 'XL', 'XXL', '3XL', '2M'];
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await getCategories();
+                setCategories(res.data);
+                // Set default if not edit
+                if (!isEdit && res.data.length > 0) {
+                    setFormData(prev => ({ ...prev, category: res.data[0].name }));
+                }
+            } catch (err) {
+                console.error("Failed to load categories", err);
+            }
+        };
+        fetchCategories();
+    }, [isEdit]);
 
     useEffect(() => {
         if (isEdit) {
@@ -201,12 +218,9 @@ const ProductForm = () => {
                                     onChange={handleChange}
                                     className="w-full px-3 py-2 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2F468C]/10 focus:border-[#2F468C] text-xs outline-none cursor-pointer transition-all"
                                 >
-                                    <option value="Children's Abaya">Children's Abaya</option>
-                                    <option value="Gloves & Socks">Gloves & Socks</option>
-                                    <option value="Niqab">Niqab</option>
-                                    <option value="Premium Abaya">Premium Abaya</option>
-                                    <option value="Scarf">Scarf</option>
-                                    <option value="Standard Abaya">Standard Abaya</option>
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="space-y-1.5">

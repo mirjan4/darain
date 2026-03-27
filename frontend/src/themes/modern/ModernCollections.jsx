@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChevronDown, Search } from 'lucide-react';
-import { getProducts } from '../../utils/api';
+import { getProducts, getCategories } from '../../utils/api';
 import ModernProductCard from './ModernProductCard';
 
 const ModernCollections = () => {
@@ -11,59 +11,52 @@ const ModernCollections = () => {
     const [loading, setLoading] = useState(true);
     
     const [searchTerm, setSearchTerm] = useState("");
+    const [categories, setCategories] = useState([]);
+
+    const sortOptions = ["Newest", "Price: Low to High", "Price: High to Low"];
+
     const [selectedCategory, setSelectedCategory] = useState("All Categories");
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
     const [sortBy, setSortBy] = useState("Newest");
     const [showSortDropdown, setShowSortDropdown] = useState(false);
 
-    const categories = [
-        "Children's Abaya",
-        "Gloves & Socks",
-        "Niqab",
-        "Premium Abaya",
-        "Scarf",
-        "Standard Abaya"
-    ];
-
-    const sortOptions = ["Newest", "Price: Low to High", "Price: High to Low"];
-
     useEffect(() => {
         if (urlCategory) {
-            const categoryMap = {
-                'childrens-abaya': "Children's Abaya",
-                'gloves-socks': "Gloves & Socks",
-                'niqab': "Niqab",
-                'premium-abaya': "Premium Abaya",
-                'scarf': "Scarf",
-                'standard-abaya': "Standard Abaya"
-            };
-            const mapped = categoryMap[urlCategory];
-            if (mapped) setSelectedCategory(mapped);
-            else setSelectedCategory("All Categories");
+            setSelectedCategory(urlCategory); 
         } else {
             setSelectedCategory("All Categories");
         }
     }, [urlCategory]);
 
     useEffect(() => {
-        const fetchProducts = async () => {
+        const loadInitialData = async () => {
             try {
-                const response = await getProducts();
-                setProducts(response.data || []);
+                const [prodRes, catRes] = await Promise.all([getProducts(), getCategories()]);
+                setProducts(prodRes.data || []);
+                setCategories(catRes.data || []);
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching products:", error);
+                console.error("Error fetching modern collections data:", error);
                 setLoading(false);
             }
         };
-        fetchProducts();
+        loadInitialData();
     }, []);
 
     useEffect(() => {
         let results = products.filter(product => {
-            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                  (product.product_code || '').toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesCategory = selectedCategory === "All Categories" || product.category === selectedCategory;
+            const term = searchTerm.toLowerCase();
+            const matchesSearch = 
+                product.name.toLowerCase().includes(term) ||
+                (product.product_code || '').toLowerCase().includes(term);
+
+            const productCat = (product.category_name || product.category || '').toUpperCase();
+            const selectedUpper = selectedCategory.toUpperCase();
+            const selectedAsSlug = selectedCategory.replace(/-/g, ' ').toUpperCase();
+
+            const matchesCategory = selectedCategory === "All Categories" || 
+                                   productCat === selectedUpper || 
+                                   productCat === selectedAsSlug;
             return matchesSearch && matchesCategory;
         });
 
@@ -146,11 +139,11 @@ const ModernCollections = () => {
                                     </button>
                                     {categories.map(cat => (
                                         <button 
-                                            key={cat}
-                                            onClick={() => { setSelectedCategory(cat); setShowCategoryDropdown(false); }}
-                                            className={`w-full text-left px-6 py-2.5 text-sm transition-colors ${selectedCategory === cat ? 'font-bold text-black bg-gray-50' : 'text-gray-600 hover:text-black hover:bg-gray-50/50'}`}
+                                            key={cat.id}
+                                            onClick={() => { setSelectedCategory(cat.name); setShowCategoryDropdown(false); }}
+                                            className={`w-full text-left px-6 py-2.5 text-sm transition-colors ${selectedCategory.toUpperCase() === cat.name.toUpperCase() ? 'font-bold text-black bg-gray-50' : 'text-gray-600 hover:text-black hover:bg-gray-50/50'}`}
                                         >
-                                            {cat}
+                                            {cat.name.charAt(0) + cat.name.slice(1).toLowerCase()}
                                         </button>
                                     ))}
                                 </div>

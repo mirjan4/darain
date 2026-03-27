@@ -237,7 +237,7 @@ const AdminProducts = () => {
                                             <div className="flex items-center gap-4">
                                                 <div className="w-14 h-16 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden flex-shrink-0 group-hover:shadow-md transition-all duration-300">
                                                     <img 
-                                                        src={product.main_image ? `${UPLOADS_BASE_URL}/${product.main_image}` : 'https://via.placeholder.com/80x100?text=No+Image'} 
+                                                        src={product.main_image ? `${UPLOADS_BASE_URL}/${product.main_image}` : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='100' viewBox='0 0 80 100'%3E%3Crect width='80' height='100' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='9' fill='%23cbd5e1' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E`} 
                                                         className="w-full h-full object-cover"
                                                         alt={product.name}
                                                     />
