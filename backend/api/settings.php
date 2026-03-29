@@ -34,7 +34,7 @@ if ($method === 'POST') {
         'logo', 'favicon', 'phone', 'whatsapp', 'email', 'address', 
         'business_hours', 'map_embed_url',
         'about_title', 'about_subtitle', 'about_description', 'about_image',
-        'theme', 'brand_name', 'top_bar_text'
+        'theme', 'brand_name', 'top_bar_text', 'slider_interval'
     ];
 
     // Check if row exists

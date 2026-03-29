@@ -10,11 +10,12 @@ if(!empty($data->name) && !empty($data->phone)){
     $product_id = $data->product_id ?? null;
 
     $selected_size = $data->selected_size ?? null;
+    $selected_color = $data->selected_color ?? null;
 
-    $query = "INSERT INTO enquiries (name, phone, message, product_id, selected_size) VALUES (?, ?, ?, ?, ?)";
+    $query = "INSERT INTO enquiries (name, phone, message, product_id, selected_size, selected_color) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($query);
 
-    if($stmt->execute([$name, $phone, $message, $product_id, $selected_size])){
+    if($stmt->execute([$name, $phone, $message, $product_id, $selected_size, $selected_color])){
         http_response_code(201);
         echo json_encode(["message" => "Enquiry sent."]);
     } else {

@@ -4,12 +4,18 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Sparkles, ChevronRight, ShoppingBag, ShieldCheck, Truck, CreditCard } from 'lucide-react';
 import { getProducts, getHeroSlides, getCategories, UPLOADS_BASE_URL } from '../../utils/api';
 import MotionGreenProductCard from './MotionGreenProductCard';
+import TestimonialsSection from '../../components/TestimonialsSection';
+import { useSettings } from '../../context/SettingsContext';
 
 const MotionGreenHome = () => {
     const [products, setProducts] = useState([]);
     const [slides, setSlides] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+
+    const { settings } = useSettings();
+    const slideSpeed = parseInt(settings?.slider_interval) || 7000;
     
     // Scroll Hooks for Advanced Animations
     const heroRef = useRef(null);
@@ -31,7 +37,18 @@ const MotionGreenHome = () => {
                 setProducts(pRes.data || []);
                 const slideData = sRes.data?.data || sRes.data || [];
                 setSlides(slideData);
-                setCategories(cRes.data || []);
+                const categoryData = cRes.data?.data || cRes.data || [];
+                const sortedCats = Array.isArray(categoryData) ? [...categoryData].sort((a, b) => {
+                    const order = ["PREMIUM ABAYA", "STANDARD ABAYA"];
+                    const aIndex = order.indexOf(a.name.toUpperCase());
+                    const bIndex = order.indexOf(b.name.toUpperCase());
+                    
+                    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+                    if (aIndex !== -1) return -1;
+                    if (bIndex !== -1) return 1;
+                    return 0; // Keep the rest in their original (likely latest ID) order
+                }) : [];
+                setCategories(sortedCats);
             } catch (err) {
                 console.error("Home load failed", err);
             } finally {
@@ -41,17 +58,18 @@ const MotionGreenHome = () => {
         loadHomeData();
     }, []);
 
-    // Function to get image for category
-    const getCategoryImage = (catName) => {
-        const product = products.find(p => 
-            (p.category_name || p.category || '').toUpperCase() === catName.toUpperCase()
-        );
-        return product ? `${UPLOADS_BASE_URL}/${product.main_image}` : null;
-    };
+    const nextSlide = () => setActiveSlideIndex(prev => (prev + 1) % (slides.length || 1));
 
-    // Hero Image Logic
-    const heroImage = slides.length > 0 
-        ? `${UPLOADS_BASE_URL}/${slides[0].image}` 
+    useEffect(() => {
+        if (slides.length <= 1) return;
+        const timer = setInterval(nextSlide, slideSpeed);
+        return () => clearInterval(timer);
+    }, [slides.length, slideSpeed]);
+
+    // Hero Image Logic (Current Active Slide)
+    const currentSlide = slides[activeSlideIndex] || (slides.length > 0 ? slides[0] : null);
+    const heroImage = currentSlide?.image 
+        ? `${UPLOADS_BASE_URL}/${currentSlide.image}`
         : "https://images.unsplash.com/photo-1583391733924-46c59d997f76?auto=format&fit=crop&q=80&w=1500";
 
     // Animation Variants
@@ -82,75 +100,77 @@ const MotionGreenHome = () => {
                 
                 <motion.div style={{ y: yHero, opacity: opacityHero, scale: scaleHero }} className="max-w-[1440px] w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center z-10">
                     <div className="space-y-8 md:space-y-12 order-2 lg:order-1">
-                        <div className="space-y-6">
+                        <AnimatePresence mode="wait">
                             <motion.div 
-                                initial={{ opacity: 0, x: -20 }}
+                                key={activeSlideIndex}
+                                initial={{ opacity: 0, x: -30 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.8 }}
-                                className="flex items-center gap-4 group"
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                className="space-y-6"
                             >
-                                <span className="h-[2px] w-12 bg-[#7FBFA6] transition-all group-hover:w-20 duration-700"></span>
-                                <span className="text-xs font-black uppercase tracking-[0.4em] text-[#7FBFA6]">Est. 2024 Collection</span>
+                                <div className="flex items-center gap-4 group">
+                                    <span className="h-[2px] w-12 bg-[#7FBFA6] transition-all group-hover:w-20 duration-700"></span>
+                                    <span className="text-xs font-black uppercase tracking-[0.4em] text-[#7FBFA6]">{currentSlide?.subtitle || "EST. 2024 COLLECTION"}</span>
+                                </div>
+                                
+                                <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tighter text-[#1A1A1A] leading-[0.95] md:leading-[0.9] uppercase">
+                                    {currentSlide?.title ? currentSlide.title.split(' ')[0] : 'SEAMLESS'} <br/>
+                                    <span className="text-[#7FBFA6]">{currentSlide?.title ? currentSlide.title.split(' ').slice(1).join(' ') : 'ELEGANCE'}</span>
+                                </h1>
+                                
+                                <p className="text-base md:text-2xl text-gray-500 max-w-lg font-medium tracking-tight">
+                                    {currentSlide?.description || 'Experience the future of modest luxury. Soft fabrics, fluid motion, and timeless designs curated for the modern woman.'}
+                                </p>
                             </motion.div>
-                            
-                            <motion.h1 
-                                initial={{ opacity: 0, y: 40 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                                className="text-5xl md:text-8xl font-black tracking-tighter text-[#1A1A1A] leading-[0.95] md:leading-[0.9]"
-                            >
-                                {slides[0]?.title ? slides[0].title.split(' ')[0] : 'SEAMLESS'} <br/>
-                                <span className="text-[#7FBFA6]">{slides[0]?.title ? slides[0].title.split(' ').slice(1).join(' ') : 'ELEGANCE'}</span>
-                            </motion.h1>
-                            
-                            <motion.p 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 1, delay: 0.4 }}
-                                className="text-lg md:text-2xl text-gray-500 max-w-lg font-medium tracking-tight"
-                            >
-                                {slides[0]?.subtitle || 'Experience the future of modest luxury. Soft fabrics, fluid motion, and timeless designs curated for the modern woman.'}
-                            </motion.p>
-                        </div>
+                        </AnimatePresence>
 
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 1, delay: 0.6 }}
-                            className="flex flex-col sm:flex-row gap-6 pt-4"
+                            className="flex flex-col sm:flex-row gap-4 pt-4"
                         >
-                            <Link to="/collections" className="group relative bg-[#7FBFA6] text-white px-12 py-6 rounded-full text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-[#7FBFA6]/30 overflow-hidden text-center">
+                            <Link to="/collections" className="group relative bg-[#7FBFA6] text-white px-8 md:px-12 py-5 md:py-6 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-[#7FBFA6]/30 overflow-hidden text-center">
                                 <span className="relative z-10 flex items-center justify-center gap-3">
                                     DISCOVER NOW <ArrowRight size={16} className="transition-transform group-hover:translate-x-2" />
                                 </span>
                                 <div className="absolute inset-0 bg-[#6FAE95] translate-y-full group-hover:translate-y-0 transition-transform duration-500 rounded-full" />
                             </Link>
-                            <Link to="/about" className="group px-12 py-6 rounded-full text-xs font-black uppercase tracking-[0.2em] border border-gray-200 text-gray-500 hover:text-[#1A1A1A] hover:bg-white transition-all text-center">
+                            <Link to="/about" className="group px-8 md:px-12 py-5 md:py-6 rounded-full text-[10px] md:text-xs font-black uppercase tracking-[0.2em] border border-gray-200 text-gray-500 hover:text-[#1A1A1A] hover:bg-white transition-all text-center">
                                 OUR CRAFT
                             </Link>
                         </motion.div>
                     </div>
 
                     <motion.div style={{ rotate: rotateHero }} className="relative order-1 lg:order-2 h-[400px] md:h-[600px] flex items-center justify-center">
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-                            className="w-full h-full relative"
-                        >
-                            <img 
-                                src={heroImage} 
-                                className="w-full h-full object-cover rounded-[60px] shadow-2xl shadow-black/5" 
-                                alt="Hero" 
-                                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1583391733924-46c59d997f76?auto=format&fit=crop&q=80&w=1500"; }}
-                            />
-                            <div className="absolute -bottom-10 -left-10 bg-white p-8 rounded-[40px] shadow-2xl border border-gray-50 max-w-[200px] space-y-3 hidden md:block">
-                                <div className="p-2 w-10 h-10 bg-[#EEF5F2] text-[#7FBFA6] rounded-2xl flex items-center justify-center"><Sparkles size={20}/></div>
-                                <h4 className="text-sm font-black uppercase tracking-widest text-[#1A1A1A]">Curated Silk</h4>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-relaxed">Handpicked premium silk from ethical sources.</p>
-                            </div>
-                            <div className="absolute inset-0 rounded-[60px] border border-white/20"></div>
-                        </motion.div>
+                        <AnimatePresence mode="wait">
+                            <motion.div 
+                                key={activeSlideIndex}
+                                initial={{ opacity: 0, scale: 0.9, rotate: -3 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                exit={{ opacity: 0, scale: 1.05 }}
+                                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                                className="w-full h-full relative"
+                            >
+                                <img 
+                                    src={heroImage} 
+                                    className="w-full h-full object-cover rounded-[40px] md:rounded-[60px] shadow-2xl shadow-black/5" 
+                                    alt="Hero" 
+                                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1583391733924-46c59d997f76?auto=format&fit=crop&q=80&w=1500"; }}
+                                />
+                                <div className="absolute -bottom-6 -left-4 md:-bottom-10 md:-left-10 bg-white p-5 md:p-8 rounded-[30px] md:rounded-[40px] shadow-2xl border border-gray-50 max-w-[150px] md:max-w-[200px] space-y-2 md:space-y-3">
+                                    <div className="p-2 w-8 h-8 md:w-10 md:h-10 bg-[#EEF5F2] text-[#7FBFA6] rounded-xl md:rounded-2xl flex items-center justify-center"><Sparkles size={16}/></div>
+                                    <h4 className="text-[10px] md:text-sm font-black uppercase tracking-widest text-[#1A1A1A] leading-tight">
+                                        {currentSlide?.title ? currentSlide.title.split(' ')[0] : 'CURATED SILK'}
+                                    </h4>
+                                    <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-relaxed">
+                                        {currentSlide?.subtitle || "Handpicked premium fabrics."}
+                                    </p>
+                                </div>
+                                <div className="absolute inset-0 rounded-[40px] md:rounded-[60px] border border-white/20"></div>
+                            </motion.div>
+                        </AnimatePresence>
                     </motion.div>
                 </motion.div>
 
@@ -190,7 +210,8 @@ const MotionGreenHome = () => {
                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
                 >
                     {categories.slice(0, 4).map((cat, idx) => {
-                        const catImg = getCategoryImage(cat.name);
+                        const product = products.find(p => (p.category_name || p.category || '').toUpperCase() === cat.name.toUpperCase());
+                        const catImg = product ? `${UPLOADS_BASE_URL}/${product.main_image}` : null;
                         return (
                             <motion.div 
                                 key={cat.name}
@@ -229,7 +250,7 @@ const MotionGreenHome = () => {
             <motion.section 
                 ref={collectionRef}
                 style={{ scale: collectionScale }}
-                className="bg-[#EEF5F2]/50 py-32 md:py-48 rounded-[80px] md:mx-6 overflow-hidden"
+                className="relative bg-[#EEF5F2]/50 py-32 md:py-48 rounded-[80px] md:mx-6 overflow-hidden"
             >
                 <div className="max-w-[1440px] mx-auto px-6">
                     <div className="flex flex-col items-center space-y-6 mb-24 text-center">
@@ -266,7 +287,7 @@ const MotionGreenHome = () => {
                     ) : (
                         <motion.div 
                             initial="hidden" whileInView="visible" viewport={{ once: true }}
-                            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 md:gap-x-12 md:gap-y-20"
+                            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-10 md:gap-x-12 md:gap-y-20"
                         >
                             {products.slice(0, 8).map((product, idx) => (
                                 <MotionGreenProductCard key={product.id} product={product} index={idx} />
@@ -285,7 +306,10 @@ const MotionGreenHome = () => {
                 </div>
             </motion.section>
 
-            {/* 4. BRAND VALUES - MINIMAL CARDS */}
+            {/* 4. PREMIUM TESTIMONIALS SECTION */}
+            <TestimonialsSection />
+
+            {/* 5. BRAND VALUES - MINIMAL CARDS */}
             <section className="max-w-7xl mx-auto px-6 py-20">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
                     {[

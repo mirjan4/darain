@@ -21,7 +21,10 @@ api.interceptors.request.use((config) => {
 
 export const login = (credentials) => api.post('/login.php', credentials);
 export const getProducts = () => api.get('/products.php');
-export const getCategories = () => api.get('/categories.php');
+export const getCategories = async () => {
+    const res = await api.get('/attributes.php');
+    return { data: res.data.data.categories };
+};
 export const getProductById = (id) => api.get(`/product.php?id=${id}`);
 export const addProduct = (data) => api.post('/add_product.php', data);
 export const updateProduct = (data) => api.post('/update_product.php', data);
@@ -43,6 +46,10 @@ export const deleteHeroSlide = (id) => api.get(`/delete_hero_slide.php?id=${id}`
 // Site Settings (Logo, Favicon)
 export const getSettings = () => api.get('/settings.php');
 export const updateSettings = (data) => api.post('/settings.php', data);
+
+// Attributes
+export const getAttributes = () => api.get('/attributes.php');
+export const manageAttribute = (data) => api.post('/attributes.php', data);
 
 export { UPLOADS_BASE_URL };
 export default api;

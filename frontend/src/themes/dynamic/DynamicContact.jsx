@@ -12,6 +12,7 @@ import {
     Facebook
 } from 'lucide-react';
 import { useSettings } from '../../context/SettingsContext';
+import toast from 'react-hot-toast';
 
 const DynamicContact = () => {
     const { phone, whatsapp, email, address, business_hours, map_embed_url, brand_name } = useSettings();
@@ -30,7 +31,10 @@ const DynamicContact = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        alert("Enquiry sent successfully! We will get back to you soon.");
+        toast.success("Enquiry sent successfully! We will get back to you soon.", {
+            style: { borderRadius: '12px', background: '#333', color: '#fff', fontSize: '14px', fontWeight: 'bold' }
+        });
+        setFormState({ name: '', email: '', subject: '', message: '' });
     };
 
     return (

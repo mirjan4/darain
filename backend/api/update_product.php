@@ -16,7 +16,7 @@ if(!empty($data->id) && !empty($data->product_code) && !empty($data->name) && !e
     try {
         $conn->beginTransaction();
 
-        $query = "UPDATE products SET product_code = ?, name = ?, description = ?, category = ?, price = ?, offer_price = ?, stock_status = ?, sizes = ? WHERE id = ?";
+        $query = "UPDATE products SET product_code = ?, name = ?, description = ?, category = ?, price = ?, offer_price = ?, stock_status = ?, sizes = ?, colors = ? WHERE id = ?";
         $stmt = $conn->prepare($query);
         $stmt->execute([
             $data->product_code,
@@ -27,6 +27,7 @@ if(!empty($data->id) && !empty($data->product_code) && !empty($data->name) && !e
             $data->offer_price ?? null,
             $data->stock_status ?? 'In Stock',
             $data->sizes ?? "",
+            $data->colors ?? "",
             $data->id
         ]);
 

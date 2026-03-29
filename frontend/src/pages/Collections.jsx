@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Search, SlidersHorizontal, Filter } from 'lucide-react';
 import { getProducts } from '../utils/api';
-import ProductCard from '../components/ProductCard';
-import HeroCarousel from '../components/HeroCarousel';
 import { Link } from 'react-router-dom';
+import { useSettings } from '../context/SettingsContext';
+import MotionGreenProductCard from '../themes/motion-green/MotionGreenProductCard';
+import DynamicProductCard from '../themes/dynamic/DynamicProductCard';
+
+import ProductCard from '../components/ProductCard';
 
 const Collections = () => {
     const { category: urlCategory } = useParams();
+    const { settings } = useSettings();
+    const uiModeSetting = settings?.ui_mode || 'default';
+    
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -167,12 +173,32 @@ const Collections = () => {
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-                            {filteredProducts.map((product, index) => (
-                                <div key={product.id} className="flex justify-start" data-aos="fade-up" data-aos-delay={(index % 8) * 100}>
-                                    <ProductCard product={product} />
-                                </div>
-                            ))}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+                            {filteredProducts.map((product, index) => {
+                                const delay = (index % 8) * 100;
+
+                                if (uiModeSetting === 'motion-green') {
+                                    return (
+                                        <div key={product.id} data-aos="fade-up" data-aos-delay={delay}>
+                                            <MotionGreenProductCard product={product} index={index} />
+                                        </div>
+                                    );
+                                }
+
+                                if (uiModeSetting === 'dynamic') {
+                                    return (
+                                        <div key={product.id} data-aos="fade-up" data-aos-delay={delay}>
+                                            <DynamicProductCard product={product} />
+                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div key={product.id} className="flex justify-start" data-aos="fade-up" data-aos-delay={delay}>
+                                        <ProductCard product={product} />
+                                    </div>
+                                );
+                            })}
                         </div>
                         
                         {filteredProducts.length === 0 && (

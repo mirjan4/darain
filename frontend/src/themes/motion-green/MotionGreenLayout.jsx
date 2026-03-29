@@ -41,7 +41,7 @@ const MotionGreenLayout = ({ children }) => {
             initial="hidden" 
             animate="visible" 
             variants={containerVariants}
-            className="min-h-screen bg-[#F8FAF9] text-[#1A1A1A] font-outfit"
+            className="relative min-h-screen bg-[#F8FAF9] text-[#1A1A1A] font-outfit"
         >
             {/* STICKY NAV BAR */}
             <nav className={`fixed top-0 inset-x-0 z-[100] transition-all duration-700 ${isScrolled ? 'bg-white/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] py-4' : 'bg-transparent py-8'}`}>

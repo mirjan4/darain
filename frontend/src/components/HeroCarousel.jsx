@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { getHeroSlides, UPLOADS_BASE_URL } from '../utils/api';
+import { useSettings } from '../context/SettingsContext';
 
 // Static fallback slides (used if no slides are set up in admin)
 import slide1 from '../assets/banner.webp';
-import slide2 from '../assets/hero_slide_2.png';
-import slide3 from '../assets/hero_slide_3.png';
 
 const FALLBACK_SLIDES = [
     {
@@ -16,22 +15,6 @@ const FALLBACK_SLIDES = [
         description: "Discover beautifully designed abayas that combine modesty, comfort, and modern elegance.",
         cta: "Explore Collection",
         link: "/collections"
-    },
-    {
-        image: slide2,
-        subtitle: "Premium Quality • Fine Fabrics",
-        title: "The Luxury\nCollection",
-        description: "Exquisite designs crafted with the finest luxury fabrics for your special moments.",
-        cta: "Shop Premium",
-        link: "/collections/premium-abaya"
-    },
-    {
-        image: slide3,
-        subtitle: "New Arrivals • Seasonal Trends",
-        title: "Timeless\nSophistication",
-        description: "Stay ahead with our latest seasonal drops, where tradition meets contemporary style.",
-        cta: "View New Drops",
-        link: "/collections"
     }
 ];
 
@@ -39,6 +22,8 @@ const HeroCarousel = () => {
     const [slides, setSlides] = useState(FALLBACK_SLIDES);
     const [current, setCurrent] = useState(0);
     const [apiLoaded, setApiLoaded] = useState(false);
+    const { settings } = useSettings();
+    const slideSpeed = parseInt(settings?.slider_interval) || 6000;
 
     useEffect(() => {
         const fetchSlides = async () => {
@@ -69,9 +54,9 @@ const HeroCarousel = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-        }, 6000);
+        }, slideSpeed);
         return () => clearInterval(timer);
-    }, [slides]);
+    }, [slides, slideSpeed]);
 
     const nextSlide = () => setCurrent((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
     const prevSlide = () => setCurrent((prev) => (prev === 0 ? slides.length - 1 : prev - 1));

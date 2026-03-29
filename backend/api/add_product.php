@@ -16,7 +16,7 @@ if(!empty($data->name) && !empty($data->product_code) && !empty($data->price) &&
     try {
         $conn->beginTransaction();
 
-        $query = "INSERT INTO products (product_code, name, description, category, price, offer_price, stock_status, sizes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO products (product_code, name, description, category, price, offer_price, stock_status, sizes, colors) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($query);
         $stmt->execute([
             $data->product_code,
@@ -26,7 +26,8 @@ if(!empty($data->name) && !empty($data->product_code) && !empty($data->price) &&
             $data->price,
             $data->offer_price ?? null,
             $data->stock_status ?? 'In Stock',
-            $data->sizes ?? ""
+            $data->sizes ?? "",
+            $data->colors ?? ""
         ]);
         
         $productId = $conn->lastInsertId();

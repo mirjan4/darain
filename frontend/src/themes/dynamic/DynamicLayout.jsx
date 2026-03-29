@@ -40,7 +40,7 @@ const DynamicLayout = ({ children }) => {
     const isActive = (path) => location.pathname === path;
 
     return (
-        <div className="min-h-screen bg-white font-outfit text-gray-900 selection:bg-black selection:text-white">
+        <div className="relative min-h-screen bg-white font-outfit text-gray-900 selection:bg-black selection:text-white">
             
             {/* 1. DYNAMIC TOP BAR (Utility + Motion) */}
             <div className="bg-[#281c15] text-white border-b border-white/5 py-2.5 px-6 md:px-12 text-[10px] font-bold uppercase tracking-[0.15em] relative z-[110]">

@@ -12,12 +12,16 @@ import {
     ShoppingBag
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import TestimonialsSection from '../../components/TestimonialsSection';
+import { useSettings } from '../../context/SettingsContext';
 
 const DynamicHome = () => {
     const [products, setProducts] = useState([]);
     const [slides, setSlides] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+    const { settings } = useSettings();
+    const slideSpeed = parseInt(settings?.slider_interval) || 8000;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -87,9 +91,9 @@ const DynamicHome = () => {
 
     useEffect(() => {
         if (slides.length <= 1) return;
-        const interval = setInterval(nextSlide, 8000);
+        const interval = setInterval(nextSlide, slideSpeed);
         return () => clearInterval(interval);
-    }, [slides.length]);
+    }, [slides.length, slideSpeed]);
 
     return (
         <div className="flex flex-col gap-24 pb-24 font-sans overflow-hidden">
@@ -235,24 +239,8 @@ const DynamicHome = () => {
                 </div>
             </section>
 
-            {/* 4. PROMOTIONAL BANNER SECTION */}
-            <section className="max-w-[1440px] mx-auto px-6 md:px-12 w-full">
-                <div className="relative h-[550px] md:h-[650px] w-full rounded-[40px] overflow-hidden group shadow-2xl shadow-[#F4EDE4]/30" data-aos="zoom-in">
-                    <img src="https://images.unsplash.com/photo-1594235412402-b1cd9697d82f?auto=format&fit=crop&q=80&w=1500" className="w-full h-full object-cover transition-transform duration-[3000ms] group-hover:scale-110" alt="Promo" />
-                    <div className="absolute inset-0 bg-[#F4EDE4]/20 group-hover:bg-[#F4EDE4]/10 transition-all duration-1000"></div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 md:p-12 text-center gap-8">
-                         <div className="p-4 rounded-full bg-white/20 backdrop-blur-md border border-white/40 animate-bounce">
-                            <Sparkles className="text-white" size={24} />
-                         </div>
-                         <h2 className="text-4xl md:text-7xl font-black font-outfit text-white tracking-tighter leading-[0.9] drop-shadow-2xl">
-                            Elegance in every movement
-                         </h2>
-                         <Link to="/about" className="bg-white text-black px-12 py-5 rounded-full text-[10px] font-black font-outfit uppercase tracking-[0.25em] shadow-lg hover:bg-black hover:text-white transition-all transform hover:-translate-y-1 active:scale-95 duration-500">
-                            Our Design Philosophy
-                         </Link>
-                    </div>
-                </div>
-            </section>
+            {/* 4. PREMIUM TESTIMONIALS SECTION (REPLACED PHILOSOPHY) */}
+            <TestimonialsSection />
 
             {/* 5. DYNAMIC FEATURE HIGHLIGHTS */}
             <section className="max-w-[1440px] mx-auto px-6 md:px-12 w-full py-20 bg-white border border-gray-100 rounded-[40px] shadow-sm overflow-hidden" data-aos="fade-up">

@@ -87,10 +87,9 @@ const DynamicCollections = () => {
                         ))}
                     </div>
                     <div className="flex items-center gap-4 px-4 pt-4 lg:pt-0 lg:border-l border-gray-100 font-outfit">
-                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{products.length} Products Found</span>
+                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{products.length} {activeFilter} </span>
                          <div className="h-6 w-[1.5px] bg-gray-100 mx-2"></div>
-                         <button className="text-gray-900 flex items-center gap-2 hover:text-[#2F468C] transition-colors"><LayoutGrid size={18} /></button>
-                         <button className="text-gray-300 flex items-center gap-2 hover:text-[#2F468C] transition-colors"><List size={18} /></button>
+                        
                     </div>
                 </div>
 

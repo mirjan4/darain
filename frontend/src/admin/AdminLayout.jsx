@@ -11,7 +11,8 @@ import {
   Menu, 
   X,
   User,
-  ChevronRight
+  ChevronRight,
+  ListRestart
 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { UPLOADS_BASE_URL } from '../utils/api';
@@ -32,6 +33,7 @@ const AdminLayout = ({ children }) => {
   const menuItems = [
     { name: 'Products', path: '/admin/products', icon: <ShoppingBag size={16} /> },
     { name: 'Add Product', path: '/admin/add-product', icon: <PlusCircle size={16} /> },
+    { name: 'Attributes', path: '/admin/attributes', icon: <ListRestart size={16} /> },
     { name: 'Enquiries', path: '/admin/enquiries', icon: <MessageSquare size={16} /> },
     { name: 'Settings', path: '/admin/settings', icon: <Settings size={16} /> },
   ];

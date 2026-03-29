@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
     Edit2, Trash2, Plus, Search, Eye, Filter, 
-    Package, ShoppingBag, Tag, X, Settings2 
+    Package, ShoppingBag, Tag, X, Settings2,
+    ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight
 } from 'lucide-react';
 import { getProducts, deleteProduct, UPLOADS_BASE_URL } from '../utils/api';
 import toast from 'react-hot-toast';
@@ -14,6 +15,10 @@ const AdminProducts = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
     const [stockFilter, setStockFilter] = useState("All");
+    
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     
     // Column Visibility State
     const [showColumnMenu, setShowColumnMenu] = useState(false);
@@ -32,6 +37,11 @@ const AdminProducts = () => {
     useEffect(() => {
         fetchProducts();
     }, []);
+
+    // Reset pagination when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, categoryFilter, stockFilter]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -90,14 +100,19 @@ const AdminProducts = () => {
     const filtered = products.filter(p => {
         const matchesSearch = 
             p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-            p.product_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.category.toLowerCase().includes(searchTerm.toLowerCase());
+            (p.product_code && p.product_code.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (p.category && p.category.toLowerCase().includes(searchTerm.toLowerCase()));
         
         const matchesCategory = categoryFilter === "All" || p.category === categoryFilter;
         const matchesStock = stockFilter === "All" || p.stock_status === stockFilter;
 
         return matchesSearch && matchesCategory && matchesStock;
     });
+
+    // Pagination Logic
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedItems = filtered.slice(startIndex, startIndex + itemsPerPage);
 
     const visibleColumnCount = Object.values(visibleColumns).filter(Boolean).length;
 
@@ -208,8 +223,8 @@ const AdminProducts = () => {
                 </div>
             </div>
 
-            {/* Results Table */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Desktop Table View (Hidden on Mobile) */}
+            <div className="hidden md:block bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -230,7 +245,7 @@ const AdminProducts = () => {
                                         </td>
                                     </tr>
                                 ))
-                            ) : filtered.length > 0 ? filtered.map((product) => (
+                            ) : paginatedItems.length > 0 ? paginatedItems.map((product) => (
                                 <tr key={product.id} className="hover:bg-gray-50/30 transition-colors group">
                                     {visibleColumns.details && (
                                         <td className="px-8 py-5">
@@ -317,6 +332,147 @@ const AdminProducts = () => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Mobile Card View (Hidden on Desktop) */}
+            <div className="md:hidden space-y-4">
+                {loading ? (
+                    Array(5).fill(0).map((_, i) => (
+                        <div key={i} className="bg-white p-4 rounded-2xl border border-gray-100 animate-pulse space-y-3">
+                            <div className="flex gap-4">
+                                <div className="w-20 h-24 bg-gray-100 rounded-xl"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+                                    <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                            <div className="h-10 bg-gray-50 rounded-xl"></div>
+                        </div>
+                    ))
+                ) : paginatedItems.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-4">
+                        {paginatedItems.map((product) => (
+                            <div key={product.id} className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-4">
+                                <div className="flex gap-4">
+                                    <div className="w-20 h-24 bg-gray-100 rounded-xl border border-gray-100 overflow-hidden flex-shrink-0">
+                                        <img 
+                                            src={product.main_image ? `${UPLOADS_BASE_URL}/${product.main_image}` : `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='100' viewBox='0 0 80 100'%3E%3Crect width='80' height='100' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='9' fill='%23cbd5e1' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E`} 
+                                            className="w-full h-full object-cover"
+                                            alt={product.name}
+                                        />
+                                    </div>
+                                    <div className="flex-1 min-w-0 py-1">
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{product.category}</p>
+                                        <h3 className="font-bold text-gray-900 text-sm truncate">{product.name}</h3>
+                                        <p className="text-[10px] text-gray-500 font-bold mt-1 uppercase">{product.product_code}</p>
+                                        <div className="flex items-center justify-between mt-3">
+                                            <div className="flex flex-col">
+                                                <span className="font-black text-[#2F468C] text-sm">₹{product.offer_price || product.price}</span>
+                                                {product.offer_price && product.offer_price > 0 && (
+                                                    <span className="text-[10px] text-gray-500 line-through">₹{product.price}</span>
+                                                )}
+                                            </div>
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider border ${
+                                                product.stock_status === 'Out of Stock' 
+                                                ? 'text-red-500 bg-red-50 border-red-100' 
+                                                : 'text-green-600 bg-green-50 border-green-100'
+                                            }`}>
+                                                {product.stock_status}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <Link to={`/admin/edit-product/${product.id}`} className="flex items-center justify-center gap-2 py-2.5 bg-gray-50 text-gray-600 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                        <Edit2 size={14} /> Edit
+                                    </Link>
+                                    <button onClick={() => handleDelete(product.id)} className="flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-500 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                        <Trash2 size={14} /> Remove
+                                    </button>
+                                    <Link to={`/product/${product.id}`} target="_blank" className="flex items-center justify-center gap-2 py-2.5 bg-[#2F468C] text-white rounded-xl text-[10px] font-black uppercase tracking-widest">
+                                        <Eye size={14} /> Pre
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="p-12 text-center opacity-40">
+                        <ShoppingBag size={48} className="text-gray-200 mx-auto mb-4" />
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Empty Selection</p>
+                    </div>
+                )}
+            </div>
+
+            {/* Pagination Controls - Shared */}
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+                {!loading && filtered.length > 0 && (
+                    <div className="px-8 py-5 flex flex-col md:flex-row items-center justify-between gap-6 overflow-x-auto">
+                        {/* Summary */}
+                        <div className="text-sm font-medium text-gray-500 whitespace-nowrap">
+                            Showing <span className="text-gray-900 font-bold">{startIndex + 1}</span> to <span className="text-gray-900 font-bold">{Math.min(startIndex + itemsPerPage, filtered.length)}</span> of <span className="text-gray-900 font-bold">{filtered.length}</span> results
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center gap-8">
+                            {/* Rows per page */}
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm font-medium text-gray-500">Rows per page</span>
+                                <div className="relative">
+                                    <select 
+                                        value={itemsPerPage}
+                                        onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                                        className="appearance-none bg-white border border-gray-200 rounded-lg px-4 py-1.5 pr-8 text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2F468C]/10 transition-all cursor-pointer"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value={100}>100</option>
+                                    </select>
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                        <ChevronRight size={14} className="rotate-90" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Page Info */}
+                            <div className="text-sm font-medium text-gray-900 whitespace-nowrap">
+                                Page <span className="font-bold">{currentPage}</span> of <span className="font-bold">{totalPages}</span>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-1.5">
+                                <button 
+                                    onClick={() => setCurrentPage(1)}
+                                    disabled={currentPage === 1}
+                                    className={`p-2 rounded-lg border transition-all ${currentPage === 1 ? 'border-gray-50 text-gray-100 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95'}`}
+                                >
+                                    <ChevronsLeft size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className={`p-2 rounded-lg border transition-all ${currentPage === 1 ? 'border-gray-50 text-gray-100 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95'}`}
+                                >
+                                    <ChevronLeft size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className={`p-2 rounded-lg border transition-all ${currentPage === totalPages ? 'border-gray-50 text-gray-100 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95'}`}
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                                <button 
+                                    onClick={() => setCurrentPage(totalPages)}
+                                    disabled={currentPage === totalPages}
+                                    className={`p-2 rounded-lg border transition-all ${currentPage === totalPages ? 'border-gray-50 text-gray-100 cursor-not-allowed' : 'border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95'}`}
+                                >
+                                    <ChevronsRight size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

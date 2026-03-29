@@ -8,7 +8,10 @@ const ExploreCollections = () => {
 
     useEffect(() => {
         getCategories()
-            .then(res => setCategories(res.data))
+            .then(res => {
+                const data = res.data?.data || res.data || [];
+                setCategories(Array.isArray(data) ? data : []);
+            })
             .catch(() => {
                 // Fallback to static list if API fails
                 setCategories([

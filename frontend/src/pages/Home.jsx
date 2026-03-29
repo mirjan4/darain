@@ -7,6 +7,7 @@ import ExploreCollections from '../components/ExploreCollections';
 import Contact from '../components/Contact';
 import HeroCarousel from '../components/HeroCarousel';
 import Features from '../components/Features';
+import TestimonialsSection from '../components/TestimonialsSection';
 
 
 const Home = () => {
@@ -129,6 +130,9 @@ const Home = () => {
             
                 {/* Explore All Collections */}
                 <ExploreCollections />
+
+                {/* Premium Testimonials Section */}
+                <TestimonialsSection />
                 
                 {/* Contact & Map Section */}
                 <Contact />

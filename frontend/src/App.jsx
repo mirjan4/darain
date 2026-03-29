@@ -12,10 +12,6 @@ import Collections from './pages/Collections';
 import ProductDetails from './pages/ProductDetails';
 import AboutUs from './pages/AboutUs';
 
-// Modern Theme Pages
-import ModernLayout from './themes/modern/ModernLayout';
-import ModernHome from './themes/modern/ModernHome';
-import ModernCollections from './themes/modern/ModernCollections';
 
 // Dynamic Theme Pages
 import DynamicLayout from './themes/dynamic/DynamicLayout';
@@ -35,7 +31,9 @@ import AdminLayout from './admin/AdminLayout';
 import AdminProducts from './admin/AdminProducts';
 import ProductForm from './admin/ProductForm';
 import AdminEnquiries from './admin/AdminEnquiries';
+import AdminEnquiryHistory from './admin/AdminEnquiryHistory';
 import AdminSettings from './admin/AdminSettings';
+import AdminAttributes from './admin/AdminAttributes';
 import ScrollToTop from './components/ScrollToTop';
 
 // Protected Route Wrapper
@@ -48,7 +46,6 @@ const ProtectedRoute = ({ children }) => {
 const ThemeRouter = () => {
     const { theme, brand_name } = useSettings();
     const activeTheme = theme || 'default';
-    const isModern = activeTheme === 'modern';
     const isDynamic = activeTheme === 'dynamic';
     const isMotionGreen = activeTheme === 'motion-green';
 
@@ -59,9 +56,9 @@ const ThemeRouter = () => {
     }, [brand_name]);
 
     // Theme components Mapping
-    const ActiveLayout = isMotionGreen ? MotionGreenLayout : (isDynamic ? DynamicLayout : (isModern ? ModernLayout : Layout));
-    const ActiveHome = isMotionGreen ? MotionGreenHome : (isDynamic ? DynamicHome : (isModern ? ModernHome : Home));
-    const ActiveCollections = isMotionGreen ? MotionGreenCollections : (isDynamic ? DynamicCollections : (isModern ? ModernCollections : Collections)); 
+    const ActiveLayout = isMotionGreen ? MotionGreenLayout : (isDynamic ? DynamicLayout : Layout);
+    const ActiveHome = isMotionGreen ? MotionGreenHome : (isDynamic ? DynamicHome : Home);
+    const ActiveCollections = isMotionGreen ? MotionGreenCollections : (isDynamic ? DynamicCollections : Collections); 
     const ActiveContact = isMotionGreen ? MotionGreenContact : (isDynamic ? DynamicContact : Home); 
     const ActiveProductDetails = ProductDetails;
     const ActiveAboutUs = AboutUs;
@@ -85,6 +82,8 @@ const ThemeRouter = () => {
             <Route path="/admin/add-product" element={<ProtectedRoute><AdminLayout><ProductForm /></AdminLayout></ProtectedRoute>} />
             <Route path="/admin/edit-product/:id" element={<ProtectedRoute><AdminLayout><ProductForm /></AdminLayout></ProtectedRoute>} />
             <Route path="/admin/enquiries" element={<ProtectedRoute><AdminLayout><AdminEnquiries /></AdminLayout></ProtectedRoute>} />
+            <Route path="/admin/enquiries/history" element={<ProtectedRoute><AdminLayout><AdminEnquiryHistory /></AdminLayout></ProtectedRoute>} />
+            <Route path="/admin/attributes" element={<ProtectedRoute><AdminLayout><AdminAttributes /></AdminLayout></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute><AdminLayout><AdminSettings /></AdminLayout></ProtectedRoute>} />
         </Routes>
     );

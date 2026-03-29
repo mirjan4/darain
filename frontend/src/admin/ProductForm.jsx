@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Save, X, Upload, Trash2, Plus, ArrowLeft, Image as ImageIcon } from 'lucide-react';
-import { addProduct, updateProduct, getProductById, uploadImage, UPLOADS_BASE_URL, getCategories } from '../utils/api';
+import { addProduct, updateProduct, getProductById, uploadImage, UPLOADS_BASE_URL, getCategories, getAttributes } from '../utils/api';
 
 const ProductForm = () => {
     const { id } = useParams();
@@ -17,28 +17,30 @@ const ProductForm = () => {
         offer_price: '',
         stock_status: 'In Stock',
         sizes: [], 
+        colors: [],
         images: []
     });
     
     const [previews, setPreviews] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const availableSizes = ['S', 'M', 'L', 'XL', 'XXL', '3XL', '2M'];
+    const [attributes, setAttributes] = useState({ categories: [], sizes: [], colors: [] });
 
     useEffect(() => {
-        const fetchCategories = async () => {
+        const fetchAllAttributes = async () => {
             try {
-                const res = await getCategories();
-                setCategories(res.data);
+                const res = await getAttributes();
+                const data = res.data.data;
+                setAttributes(data);
+                
                 // Set default if not edit
-                if (!isEdit && res.data.length > 0) {
-                    setFormData(prev => ({ ...prev, category: res.data[0].name }));
+                if (!isEdit && data.categories.length > 0) {
+                    setFormData(prev => ({ ...prev, category: data.categories[0].name }));
                 }
             } catch (err) {
-                console.error("Failed to load categories", err);
+                console.error("Failed to load attributes", err);
             }
         };
-        fetchCategories();
+        fetchAllAttributes();
     }, [isEdit]);
 
     useEffect(() => {
@@ -50,6 +52,7 @@ const ProductForm = () => {
                     setFormData({
                         ...prod,
                         sizes: prod.sizes ? prod.sizes.split(',') : [],
+                        colors: prod.colors ? prod.colors.split(',') : [],
                         images: prod.images || []
                     });
                     if (prod.images) {
@@ -74,6 +77,15 @@ const ProductForm = () => {
                 ? prev.sizes.filter(s => s !== size)
                 : [...prev.sizes, size];
             return { ...prev, sizes: newSizes };
+        });
+    };
+
+    const handleColorToggle = (color) => {
+        setFormData(prev => {
+            const newColors = prev.colors.includes(color)
+                ? prev.colors.filter(c => c !== color)
+                : [...prev.colors, color];
+            return { ...prev, colors: newColors };
         });
     };
 
@@ -123,7 +135,8 @@ const ProductForm = () => {
         try {
             const payload = {
                 ...formData,
-                sizes: formData.sizes.join(',')
+                sizes: formData.sizes.join(','),
+                colors: formData.colors.join(',')
             };
 
             if (isEdit) {
@@ -209,8 +222,17 @@ const ProductForm = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Category *</label>
+                            <div className="space-y-1.5 flex-1">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Category *</label>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => navigate('/admin/attributes')}
+                                        className="text-[9px] font-black text-[#2F468C] uppercase tracking-tighter flex items-center gap-1 hover:underline"
+                                    >
+                                        <Plus size={10}/> Add New
+                                    </button>
+                                </div>
                                 <select 
                                     name="category"
                                     required
@@ -218,7 +240,7 @@ const ProductForm = () => {
                                     onChange={handleChange}
                                     className="w-full px-3 py-2 bg-gray-50/50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2F468C]/10 focus:border-[#2F468C] text-xs outline-none cursor-pointer transition-all"
                                 >
-                                    {categories.map(cat => (
+                                    {attributes.categories.map(cat => (
                                         <option key={cat.id} value={cat.name}>{cat.name}</option>
                                     ))}
                                 </select>
@@ -281,14 +303,39 @@ const ProductForm = () => {
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Available Sizes</label>
                             <div className="flex flex-wrap gap-2 pt-1">
-                                {availableSizes.map(size => (
+                                {attributes.sizes.filter(s => s.is_active).map(s => (
                                     <button
-                                        key={size}
+                                        key={s.id}
                                         type="button"
-                                        onClick={() => handleSizeToggle(size)}
-                                        className={`w-10 h-10 rounded-lg text-[11px] font-bold transition-all border ${formData.sizes.includes(size) ? 'bg-[#2F468C] text-white border-[#2F468C] shadow-sm' : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:text-gray-600'}`}
+                                        onClick={() => handleSizeToggle(s.name)}
+                                        className={`px-4 h-10 rounded-lg text-[11px] font-bold transition-all border ${formData.sizes.includes(s.name) ? 'bg-[#2F468C] text-white border-[#2F468C] shadow-sm' : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:text-gray-600'}`}
                                     >
-                                        {size}
+                                        {s.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Available Colors</label>
+                            <div className="flex flex-wrap gap-3 pt-1">
+                                {attributes.colors.filter(c => c.is_active).map(c => (
+                                    <button
+                                        key={c.id}
+                                        type="button"
+                                        onClick={() => handleColorToggle(c.name)}
+                                        title={c.name}
+                                        className={`group relative flex items-center justify-center transition-all p-1 rounded-full border-2 ${formData.colors.includes(c.name) ? 'border-[#2F468C]' : 'border-transparent hover:border-gray-100'}`}
+                                    >
+                                        <div 
+                                            className="w-8 h-8 rounded-full border border-gray-200 shadow-inner" 
+                                            style={{ backgroundColor: c.hex_code }}
+                                        />
+                                        {formData.colors.includes(c.name) && (
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className={`w-2 h-2 rounded-full ${c.hex_code.toLowerCase() === '#ffffff' ? 'bg-black' : 'bg-white'} shadow-sm animate-in zoom-in-0`} />
+                                            </div>
+                                        )}
                                     </button>
                                 ))}
                             </div>
@@ -393,10 +440,18 @@ const ProductForm = () => {
                                 </p>
                             </div>
 
-                            <div className="flex gap-1.5 pt-1">
+                            <div className="flex flex-wrap gap-1.5 pt-1">
                                 {formData.sizes.map(s => (
-                                    <span key={s} className="w-7 h-7 rounded-lg border border-white/10 flex items-center justify-center text-[10px] font-bold bg-white/5">{s}</span>
+                                    <span key={s} className="min-w-[28px] px-1.5 h-7 rounded-lg border border-white/10 flex items-center justify-center text-[10px] font-bold bg-white/5">{s}</span>
                                 ))}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 pt-1">
+                                {formData.colors.map(c => {
+                                    const colorObj = attributes.colors.find(col => col.name === c);
+                                    return (
+                                        <div key={c} className="w-4 h-4 rounded-full border border-white/20 shadow-sm" style={{ backgroundColor: colorObj?.hex_code }} title={c} />
+                                    );
+                                })}
                             </div>
                         </div>
                         

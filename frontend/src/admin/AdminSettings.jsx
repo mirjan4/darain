@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
     ImagePlus, Save, Globe, Phone, Mail, MapPin, 
     Check, Info, Type, FileText, Layers, Plus, 
-    Pencil, Trash2, X, GripVertical 
+    Pencil, Trash2, X, GripVertical, Sparkles
 } from 'lucide-react';
 import { 
     getSettings, updateSettings, uploadImage, UPLOADS_BASE_URL,
@@ -15,10 +15,10 @@ const emptySlide = { title: '', subtitle: '', description: '', image: '', sort_o
 const AdminSettings = () => {
     // Settings State
     const [settings, setSettings] = useState({
-        logo: null, favicon: null, theme: 'default',
+        logo: null, favicon: null, theme: 'default', brand_name: '',
         phone: '', whatsapp: '', email: '', address: '', business_hours: '', map_embed_url: '',
         about_title: '', about_subtitle: '', about_description: '', about_image: null,
-        top_bar_text: '',
+        top_bar_text: '', slider_interval: '7000',
     });
     
     // Global Context helper
@@ -75,6 +75,7 @@ const AdminSettings = () => {
             await updateSettings(settings);
             setSuccess('Settings saved successfully!');
             setTimeout(() => setSuccess(''), 3000);
+            await refreshSettings();
         } catch (e) { alert('Failed to save settings.'); }
         finally { setSaving(false); }
     };
@@ -86,8 +87,11 @@ const AdminSettings = () => {
         try {
             await updateSettings(updatedSettings);
             await refreshSettings(); // Update global context immediately
-            setSuccess(`Switched to ${newTheme} theme!`);
-            setTimeout(() => setSuccess(''), 2000);
+            setSuccess(`Switched to ${newTheme} theme! Refreshing...`);
+            setTimeout(() => {
+                setSuccess('');
+                window.location.reload(); // Hard refresh to ensure all theme-specific assets reload cleanly
+            }, 1000);
         } catch (error) {
             alert('Failed to change theme.');
         } finally {
@@ -292,8 +296,13 @@ const AdminSettings = () => {
                                     <button 
                                         type="button"
                                         onClick={() => applyTheme('default')}
-                                        className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'default' || !settings.theme ? 'border-[#2F468C] bg-[#2F468C]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                        className={`group relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'default' || !settings.theme ? 'border-[#2F468C] bg-[#2F468C]/3 cursor-default' : 'border-gray-100 hover:border-gray-200 bg-white cursor-pointer'}`}
                                     >
+                                        {(settings.theme === 'default' || !settings.theme) && (
+                                            <div className="absolute top-3 right-3 w-5 h-5 bg-[#2F468C] text-white rounded-full flex items-center justify-center scale-100 animate-in zoom-in-0 duration-300 shadow-lg">
+                                                <Check size={12} strokeWidth={4} />
+                                            </div>
+                                        )}
                                         <div className="w-16 h-12 bg-gray-50 rounded shadow-sm border border-gray-100 mb-3 flex flex-col gap-1 p-1">
                                             <div className="w-full h-2 bg-gray-200 rounded-sm"></div>
                                             <div className="flex gap-1 h-3 mt-auto">
@@ -305,28 +314,17 @@ const AdminSettings = () => {
                                         <span className="text-[10px] text-gray-400 mt-1">Rich boutique style</span>
                                     </button>
 
-                                    <button 
-                                        type="button"
-                                        onClick={() => applyTheme('modern')}
-                                        className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'modern' ? 'border-[#2F468C] bg-[#2F468C]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
-                                    >
-                                        <div className="w-16 h-12 bg-white rounded shadow-sm border border-gray-100 mb-3 flex flex-col gap-1 p-1">
-                                            <div className="w-1/2 mx-auto h-2 bg-gray-100 rounded-sm"></div>
-                                            <div className="flex gap-1 h-3 mt-auto">
-                                                <div className="w-1/3 h-full bg-gray-100 rounded-sm"></div>
-                                                <div className="w-1/3 h-full bg-gray-100 rounded-sm"></div>
-                                                <div className="w-1/3 h-full bg-gray-100 rounded-sm"></div>
-                                            </div>
-                                        </div>
-                                        <span className="text-xs font-bold text-gray-900">Modern Minimal</span>
-                                        <span className="text-[10px] text-gray-400 mt-1">Clean and breathable</span>
-                                    </button>
 
                                     <button 
                                         type="button"
                                         onClick={() => applyTheme('dynamic')}
-                                        className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'dynamic' ? 'border-[#2F468C] bg-[#2F468C]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                        className={`group relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'dynamic' ? 'border-[#2F468C] bg-[#2F468C]/3 cursor-default' : 'border-gray-100 hover:border-gray-200 bg-white cursor-pointer'}`}
                                     >
+                                        {settings.theme === 'dynamic' && (
+                                            <div className="absolute top-3 right-3 w-5 h-5 bg-[#2F468C] text-white rounded-full flex items-center justify-center scale-100 animate-in zoom-in-0 duration-300 shadow-lg">
+                                                <Check size={12} strokeWidth={4} />
+                                            </div>
+                                        )}
                                         <div className="w-16 h-12 bg-[#1a1a1a] rounded shadow-sm border border-gray-100 mb-3 flex flex-col gap-1 p-1 overflow-hidden relative text-center items-center justify-center">
                                             <span className="text-[6px] text-white opacity-40 font-black">DYNAMIC</span>
                                         </div>
@@ -337,8 +335,13 @@ const AdminSettings = () => {
                                     <button 
                                         type="button"
                                         onClick={() => applyTheme('motion-green')}
-                                        className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'motion-green' ? 'border-[#7FBFA6] bg-[#7FBFA6]/5' : 'border-gray-100 hover:border-gray-200 bg-white'}`}
+                                        className={`group relative flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all ${settings.theme === 'motion-green' ? 'border-[#7FBFA6] bg-[#7FBFA6]/3 cursor-default' : 'border-gray-100 hover:border-gray-200 bg-white cursor-pointer'}`}
                                     >
+                                        {settings.theme === 'motion-green' && (
+                                            <div className="absolute top-3 right-3 w-5 h-5 bg-[#7FBFA6] text-white rounded-full flex items-center justify-center scale-100 animate-in zoom-in-0 duration-300 shadow-lg">
+                                                <Check size={12} strokeWidth={4} />
+                                            </div>
+                                        )}
                                         <div className="w-16 h-12 bg-[#F8FAF9] rounded shadow-sm border border-[#EEF5F2] mb-3 flex flex-col gap-1 p-1 overflow-hidden relative text-center items-center justify-center">
                                             <div className="w-4 h-4 bg-[#7FBFA6] rounded-full animate-bounce"></div>
                                         </div>
@@ -447,26 +450,58 @@ const AdminSettings = () => {
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 duration-500">
-                                {slides.map((slide, i) => (
-                                    <div key={slide.id} className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                                        <div className="aspect-[16/9] overflow-hidden bg-gray-50">
-                                            {slide.image ? <img src={`${UPLOADS_BASE_URL}/${slide.image}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /> : <div className="w-full h-full flex items-center justify-center text-gray-200"><Layers size={32} /></div>}
-                                        </div>
-                                        <div className="p-6">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="bg-gray-50 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-gray-100 uppercase tracking-tighter">Slide {slide.sort_order || i + 1}</span>
-                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
-                                                    <button onClick={() => openEditSlide(slide)} className="p-2 bg-white rounded-full border border-gray-100 text-gray-400 hover:text-[#2F468C] hover:border-[#2F468C]/30 transition-all shadow-sm"><Pencil size={14} /></button>
-                                                    <button onClick={() => handleDeleteSlide(slide.id)} className="p-2 bg-white rounded-full border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100 transition-all shadow-sm"><Trash2 size={14} /></button>
-                                                </div>
-                                            </div>
-                                            <h3 className="font-bold text-gray-900 text-sm truncate">{slide.title || 'Untitled Slide'}</h3>
-                                            <p className="text-[11px] text-gray-400 mt-1 truncate">{slide.subtitle || 'No subtitle provided'}</p>
-                                        </div>
+                            <>
+                                {/* Global Slider Speed Control */}
+                                <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                                    <div className="space-y-1">
+                                        <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2 pr-4 transition-all hover:translate-x-1 group">
+                                            <Sparkles className="text-amber-500 group-hover:scale-125 transition-transform" size={16} /> 
+                                            Hero Slideshow Speed
+                                        </h3>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">How many seconds to wait before changing slides? (e.g. 7000 = 7s)</p>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="flex items-center gap-4 bg-gray-50/50 p-2 rounded-2xl border border-gray-100 hover:border-[#2F468C]/30 transition-all">
+                                        <input 
+                                            type="number" 
+                                            step="1000" 
+                                            min="2000" 
+                                            max="15000"
+                                            value={settings.slider_interval || 7000} 
+                                            onChange={(e) => setSettings({ ...settings, slider_interval: e.target.value })}
+                                            className="w-32 bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-[#2F468C]/10 transition-all"
+                                        />
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest pr-4">ms</span>
+                                        <button 
+                                            onClick={handleSaveSettings}
+                                            disabled={saving}
+                                            className="bg-[#2F468C] text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#1a2b5c] transition-all disabled:opacity-50"
+                                        >
+                                            {saving ? 'Saving...' : 'Set Speed'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 duration-500">
+                                    {slides.map((slide, i) => (
+                                        <div key={slide.id} className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                                            <div className="aspect-[16/9] overflow-hidden bg-gray-50">
+                                                {slide.image ? <img src={`${UPLOADS_BASE_URL}/${slide.image}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /> : <div className="w-full h-full flex items-center justify-center text-gray-200"><Layers size={32} /></div>}
+                                            </div>
+                                            <div className="p-6">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <span className="bg-gray-50 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-gray-100 uppercase tracking-tighter">Slide {slide.sort_order || i + 1}</span>
+                                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all scale-95 group-hover:scale-100">
+                                                        <button onClick={() => openEditSlide(slide)} className="p-2 bg-white rounded-full border border-gray-100 text-gray-400 hover:text-[#2F468C] hover:border-[#2F468C]/30 transition-all shadow-sm"><Pencil size={14} /></button>
+                                                        <button onClick={() => handleDeleteSlide(slide.id)} className="p-2 bg-white rounded-full border border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-100 transition-all shadow-sm"><Trash2 size={14} /></button>
+                                                    </div>
+                                                </div>
+                                                <h3 className="font-bold text-gray-900 text-sm truncate">{slide.title || 'Untitled Slide'}</h3>
+                                                <p className="text-[11px] text-gray-400 mt-1 truncate">{slide.subtitle || 'No subtitle provided'}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
                         )}
                     </div>
                 )}
